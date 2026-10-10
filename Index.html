@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Text Host</title>
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        textarea {
+            flex-grow: 1;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border: 1px solid #333;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            border-radius: 4px;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0062a3;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            background-color: #1e1e1e;
+            color: #888;
+            border: 1px solid #333;
+            padding: 10px;
+            font-family: monospace;
+            border-radius: 4px;
+            text-overflow: ellipsis;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <!-- Raw view (shown when text is loaded via URL) -->
+        <div id="raw-view" class="hidden">
+            <pre id="raw-content"></pre>
+        </div>
+
+        <!-- Editor view (shown by default to create links) -->
+        <div id="editor-view">
+            <textarea id="text-input" placeholder="Paste your text or code here..."></textarea>
+            <div class="controls">
+                <button id="generate-btn" onclick="generateLink()">Generate Link</button>
+                <input type="text" id="output-url" readonly placeholder="Your generated link will appear here..." onclick="this.select()">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if there is data in the URL hash on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.substring(1);
+            
+            if (hash) {
+                try {
+                    // Decode from Base64 (using safe decoding for UTF-8 characters)
+                    const decodedData = decodeURIComponent(atob(hash).split('').map(function(c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                    
+                    // Switch to raw view and display content
+                    document.getElementById('editor-view').classList.add('hidden');
+                    document.getElementById('raw-view').classList.remove('hidden');
+                    document.getElementById('raw-content').textContent = decodedData;
+                    
+                    // Remove all styling to simulate a completely "raw" file feel
+                    document.body.style.backgroundColor = "#ffffff";
+                    document.body.style.color = "#000000";
+                    document.body.style.padding = "10px";
+                } catch (e) {
+                    alert("Error decoding the link data.");
+                }
+            }
+        });
+
+        // Function to compress text and generate the sharing URL
+        function generateLink() {
+            const text = document.getElementById('text-input').value;
+            if (!text.trim()) {
+                alert("Please enter some text first.");
+                return;
+            }
+
+            // Encode to Base64 (supporting UTF-8 characters safely)
+            const base64 = btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                return String.fromCharCode('0x' + p1);
+            }));
+
+            // Create full link using current page URL structure
+            const baseUrl = window.location.href.split('#')[0];
+            const finalUrl = `${baseUrl}#${base64}`;
+
+            // Output to the input box
+            const outputBox = document.getElementById('output-url');
+            outputBox.value = finalUrl;
+            outputBox.select();
+            
+            // Auto copy to clipboard
+            navigator.clipboard.writeText(finalUrl).then(() => {
+                const btn = document.getElementById('generate-btn');
+                btn.textContent = "Copied!";
+                setTimeout(() => { btn.textContent = "Generate Link"; }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
