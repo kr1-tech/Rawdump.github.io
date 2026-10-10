@@ -3,170 +3,129 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#101114">
-<title>Rawdump</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111318">
+<title>Rawdump — Simple file hosting</title>
 <style>
-:root{color-scheme:dark;--bg:#101114;--panel:#191a20;--border:#30313a;--text:#f4f4f5;--muted:#a1a1aa;--accent:#a78bfa}
+:root{color-scheme:dark;--bg:#111318;--panel:#191c23;--border:#303440;--text:#f1f3f8;--muted:#9ca3b4;--accent:#a5b4fc}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding:20px 14px}
-main{max-width:720px;margin:0 auto}
-header{margin:8px 0 24px}
-h1{font-size:30px;letter-spacing:-1px;margin:0}
-header p{color:var(--muted);margin:5px 0}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
-label{display:block;font-size:14px;font-weight:600;margin-bottom:9px}
-textarea{display:block;width:100%;min-height:240px;resize:vertical;background:#101114;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:13px;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;outline:none}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,sans-serif;padding:32px 16px}
+main{width:100%;max-width:680px;margin:6vh auto}
+header{margin-bottom:26px}
+h1{font-size:32px;letter-spacing:-1px;margin:0 0 5px}
+p{color:var(--muted);margin:0}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
+label{display:block;font-weight:600;margin-bottom:9px}
+textarea{width:100%;min-height:210px;resize:vertical;background:#101218;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:13px;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;outline:none}
 textarea:focus,input:focus{border-color:var(--accent)}
-input[type=file]{display:block;width:100%;font-size:14px;color:var(--muted)}
-button{width:100%;border:0;border-radius:10px;padding:13px 15px;font-size:15px;font-weight:700;cursor:pointer;background:var(--accent);color:#171321}
-button:disabled{opacity:.55;cursor:wait}
-.secondary{background:#292a33;color:var(--text);border:1px solid var(--border)}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-#status{font-size:14px;color:var(--muted);overflow-wrap:anywhere;margin-top:12px}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px;margin:17px 0}
+.divider:before,.divider:after{content:"";height:1px;background:var(--border);flex:1}
+input[type=file]{width:100%;font-size:14px;color:var(--muted)}
+button{border:0;border-radius:10px;background:var(--accent);color:#141621;font-weight:700;font-size:15px;padding:12px 16px;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+.primary{width:100%;margin-top:18px}
+#status{font-size:14px;margin-top:12px;overflow-wrap:anywhere}
 #result{display:none}
-#result a{display:block;color:var(--accent);overflow-wrap:anywhere;margin:8px 0 14px}
-.small{font-size:12px;color:var(--muted);line-height:1.5}
-@media(max-width:420px){body{padding:14px 10px}.panel{padding:13px}textarea{min-height:200px}.actions{grid-template-columns:1fr}}
+#link{display:block;color:var(--accent);overflow-wrap:anywhere;margin:8px 0 14px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.actions button{flex:1}
+.small{font-size:12px;margin-top:14px}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:26px}
 </style>
 </head>
 <body>
 <main>
 <header>
-<h1>Rawdump</h1>
-<p>Paste text or upload a file. Get a short link.</p>
+<h1>Rawdump<span style="color:var(--accent)">.</span></h1>
+<p>Paste text or upload a file. Get a short, shareable link.</p>
 </header>
 
 <section class="panel">
-<label for="content">Text / Script</label>
-<textarea id="content" placeholder="Paste your script here..."></textarea>
-<div class="actions">
-<button id="uploadText">Upload text</button>
-<button class="secondary" id="clear">Clear</button>
-</div>
-</section>
-
-<section class="panel">
-<label for="file">Upload a file</label>
-<input id="file" type="file">
-<p class="small">Maximum file size: 5 MB. Text uploads are limited to 1 MB.</p>
-<button id="uploadFile" style="margin-top:12px">Upload file</button>
+<form id="uploadForm">
+<label for="text">Your text</label>
+<textarea id="text" name="text" placeholder="Paste your text here..."></textarea>
+<div class="divider">OR UPLOAD A FILE</div>
+<label for="file">Choose a file</label>
+<input id="file" name="file" type="file">
+<button class="primary" id="submit" type="submit">Upload to Rawdump</button>
+<div id="status" role="status"></div>
+<p class="small">Uploads are stored in the project's public GitHub repository. Do not upload passwords, private keys, or sensitive personal information.</p>
+</form>
 </section>
 
 <section class="panel" id="result">
-<label>Your link</label>
+<label>Your link is ready</label>
 <a id="link" href="#" target="_blank" rel="noopener"></a>
 <div class="actions">
-<button id="copy">Copy link</button>
-<button class="secondary" id="open">Open link</button>
+<button id="copy" type="button">Copy link</button>
+<button id="open" type="button">Open link</button>
 </div>
 </section>
 
-<p id="status" role="status" aria-live="polite"></p>
-<p class="small">Uploaded content is public. Do not upload passwords, private keys, or personal information.</p>
+<footer>Rawdump · Simple sharing</footer>
 </main>
 
 <script>
-const WORKER_URL = "https://rawdump.offic1al.workers.dev";
+const WORKER_URL="https://rawdump-github-io.offic1al.workers.dev";
+const form=document.getElementById("uploadForm");
+const textInput=document.getElementById("text");
+const fileInput=document.getElementById("file");
+const submit=document.getElementById("submit");
+const status=document.getElementById("status");
+const result=document.getElementById("result");
+const link=document.getElementById("link");
 
-const content = document.getElementById("content");
-const fileInput = document.getElementById("file");
-const status = document.getElementById("status");
-const result = document.getElementById("result");
-const link = document.getElementById("link");
-const uploadText = document.getElementById("uploadText");
-const uploadFile = document.getElementById("uploadFile");
+form.addEventListener("submit",async event=>{
+  event.preventDefault();
+  const text=textInput.value;
+  const file=fileInput.files[0];
 
-async function upload(data, button) {
-  const oldText = button.textContent;
-  button.disabled = true;
-  uploadText.disabled = true;
-  uploadFile.disabled = true;
-  button.textContent = "Uploading...";
-  status.textContent = "Uploading. Please wait...";
-  result.style.display = "none";
+  if(!file&&!text.length){
+    status.textContent="Paste some text or choose a file first.";
+    return;
+  }
 
-  try {
-    const response = await fetch(WORKER_URL + "/upload", {
-      method: "POST",
-      body: data
+  const data=new FormData();
+  if(file)data.append("file",file);
+  else data.append("text",text);
+
+  submit.disabled=true;
+  status.textContent="Uploading... please wait.";
+  result.style.display="none";
+
+  try{
+    const response=await fetch(WORKER_URL+"/upload",{
+      method:"POST",
+      body:data
     });
+    const body=await response.json();
 
-    const answer = await response.json();
+    if(!response.ok)throw new Error(body.error||"Upload failed.");
+    if(!body.url)throw new Error("The server did not return a link.");
 
-    if (!response.ok || !answer.url) {
-      throw new Error(answer.error || "Upload failed.");
-    }
-
-    link.href = answer.url;
-    link.textContent = answer.url;
-    result.style.display = "block";
-    status.textContent = "Upload successful!";
-  } catch (error) {
-    status.textContent = "Error: " + (error.message || "Could not upload. Check your connection.");
-  } finally {
-    button.disabled = false;
-    uploadText.disabled = false;
-    uploadFile.disabled = false;
-    button.textContent = oldText;
+    link.href=body.url;
+    link.textContent=body.url;
+    result.style.display="block";
+    status.textContent="Upload successful!";
+    result.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }catch(error){
+    status.textContent="Error: "+error.message;
+  }finally{
+    submit.disabled=false;
   }
-}
-
-uploadText.addEventListener("click", () => {
-  if (!content.value.trim()) {
-    status.textContent = "Paste some text first.";
-    content.focus();
-    return;
-  }
-
-  const data = new FormData();
-  data.append("text", content.value);
-  upload(data, uploadText);
 });
 
-uploadFile.addEventListener("click", () => {
-  const file = fileInput.files[0];
-
-  if (!file) {
-    status.textContent = "Choose a file first.";
-    fileInput.click();
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    status.textContent = "The file is larger than 5 MB.";
-    return;
-  }
-
-  const data = new FormData();
-  data.append("file", file, file.name);
-  upload(data, uploadFile);
-});
-
-document.getElementById("clear").addEventListener("click", () => {
-  content.value = "";
-  fileInput.value = "";
-  status.textContent = "";
-  result.style.display = "none";
-});
-
-document.getElementById("copy").addEventListener("click", async () => {
-  try {
+document.getElementById("copy").addEventListener("click",async()=>{
+  try{
     await navigator.clipboard.writeText(link.href);
-    status.textContent = "Link copied!";
-  } catch {
-    const temp = document.createElement("textarea");
-    temp.value = link.href;
-    document.body.appendChild(temp);
-    temp.select();
-    const copied = document.execCommand("copy");
-    temp.remove();
-    status.textContent = copied ? "Link copied!" : "Copy failed. Select and copy the link above.";
+    status.textContent="Link copied!";
+  }catch{
+    status.textContent="Copy failed. Press and hold the link to copy it.";
   }
 });
 
-document.getElementById("open").addEventListener("click", () => {
-  window.open(link.href, "_blank", "noopener");
+document.getElementById("open").addEventListener("click",()=>{
+  window.open(link.href,"_blank","noopener");
 });
 </script>
 </body>
