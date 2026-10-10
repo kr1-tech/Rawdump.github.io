@@ -1,4 +1,3 @@
-
 export default {
   async fetch(request) {
     const message = "Hello worrlkej!";
