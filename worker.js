@@ -1,4 +1,3 @@
-
 const OWNER = "kr1-tech";
 const REPO = "Rawdump.github.io";
 const BRANCH = "main";
